@@ -7,13 +7,13 @@ import glob
 from ultralytics import YOLO
 
 # ==========================================
-# 1. Setup & Configuration
+# 1. Setup and Configuration
 # ==========================================
-# Update this path to match your specific folder location
+# Point to your main project folder
 os.chdir(r"C:\Users\pandy\Desktop\School Work\AER850\Project 3\AER850-Project-3\Project 3 Code Data Final")
 print(f"Working Directory: {os.getcwd()}")
 
-# GPU Check
+# Check for GPU (Graphics Card) to speed things up
 if torch.cuda.is_available():
     device_id = 0
     print(f"GPU Detected: {torch.cuda.get_device_name(0)}")
@@ -108,12 +108,12 @@ def run_step2_training():
     print("Step 2 Training Finished.")
 
 # ==========================================
-# Step 3: Evaluation (Visuals Only)
+# Step 3: Evaluation (Visuals + Metrics)
 # ==========================================
 def run_step3_evaluation():
     print("\n--- Starting Step 3: Evaluation ---")
     
-    # Load your custom trained model
+    # 1. Load your custom trained model
     model_path = r'runs\detect\pcb_model\weights\best.pt'
     if not os.path.exists(model_path):
         print(f"Error: Model not found at {model_path}")
@@ -126,7 +126,7 @@ def run_step3_evaluation():
         print(f"Error: Folder '{eval_folder}' missing.")
         return
 
-    # Run Prediction
+    # 2. Run Prediction
     print("Running predictions...")
     results = model.predict(
         source=eval_folder, 
@@ -135,28 +135,49 @@ def run_step3_evaluation():
         project='runs/detect', 
         name='evaluation_results',
         exist_ok=True,
-        line_width=3,      # Thicker lines for visibility
-        show_conf=False,   # Hide scores to clean up the view
+        line_width=3,      # Thickness for visibility
+        show_conf=False,   # Hide scores to keep it clean
         show_labels=True
     )
 
-    # Visualize the 3 Result Images
+    # 3. Visualize Everything (Images + Graphs)
     saved_folder = r'runs\detect\evaluation_results'
+    metrics_folder = r'runs\detect\pcb_model'
+    
     eval_images = glob.glob(os.path.join(saved_folder, '*.*'))
     
     if len(eval_images) > 0:
-        plt.figure(figsize=(20, 8))
+        plt.figure(figsize=(24, 12))
+        
+        # Row 1: The 3 Evaluation Images
         for i, img_file in enumerate(eval_images):
             if i >= 3: break 
-            
             img = cv2.imread(img_file)
             if img is None: continue
             
-            plt.subplot(1, 3, i + 1)
+            plt.subplot(2, 3, i + 1)
             plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             plt.title(f"Evaluation Image {i+1}")
             plt.axis("off")
-        
+
+        # Row 2: Metrics (Confusion Matrix, Loss, PR Curve)
+        metrics_files = [
+            ('confusion_matrix_normalized.png', "Confusion Matrix"),
+            ('results.png', "Training Loss & Precision"),
+            ('PR_curve.png', "Precision-Recall Curve")
+        ]
+
+        for i, (filename, title) in enumerate(metrics_files):
+            path = os.path.join(metrics_folder, filename)
+            if os.path.exists(path):
+                img = cv2.imread(path)
+                plt.subplot(2, 3, 4 + i)
+                plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                plt.title(title)
+                plt.axis("off")
+            else:
+                print(f"Warning: {filename} not found.")
+
         plt.tight_layout()
         plt.show()
         print(f"Step 3 Complete. Results in '{saved_folder}'.")
@@ -170,7 +191,7 @@ if __name__ == '__main__':
     # 1. Run Object Masking
     run_step1_masking()
 
-    # 2. Run Training (Set to False if yu want model to trian again)
+    # 2. Run Training (Set to False to re-train)
     SKIP_TRAINING = False
     
     if not SKIP_TRAINING:
