@@ -170,7 +170,7 @@ if __name__ == '__main__':
     # 1. Run Object Masking
     run_step1_masking()
 
-    # 2. Run Training (Set to False since you already finished it)
+    # 2. Run Training (Set to False if yu want model to trian again)
     SKIP_TRAINING = False
     
     if not SKIP_TRAINING:
