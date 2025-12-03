@@ -171,7 +171,7 @@ if __name__ == '__main__':
     run_step1_masking()
 
     # 2. Run Training (Set to False since you already finished it)
-    SKIP_TRAINING = True
+    SKIP_TRAINING = False
     
     if not SKIP_TRAINING:
         run_step2_training()
